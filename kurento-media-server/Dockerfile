@@ -1,28 +1,30 @@
-# stream oriented kurento
-#
-# VERSION               4.4.3
-
-FROM      ubuntu:14.04
-MAINTAINER Patxi Gortázar <patxi.gortazar@gmail.com>
+FROM kurento/kurento-media-server:6.7.2-xenial
 
 RUN apt-get update \
-  && apt-get -y dist-upgrade \
-	&& apt-get install -y wget curl
-
-RUN	echo "deb http://ubuntu.kurento.org/ trusty kms6" | tee /etc/apt/sources.list.d/kurento.list \
-	&& wget -O - http://ubuntu.kurento.org/kurento.gpg.key | apt-key add - \
-	&& apt-get update \
-	&& apt-get -y install kurento-media-server-6.0 \
-	&& apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
-
-EXPOSE 8888
-
-COPY ./entrypoint.sh /entrypoint.sh
-COPY ./healthchecker.sh /healthchecker.sh
-
-HEALTHCHECK --interval=5m --timeout=3s --retries=1 CMD /healthchecker.sh
-
-ENV GST_DEBUG=Kurento*:5
-
-ENTRYPOINT ["/entrypoint.sh"]
+  && apt-get upgrade -y \
+  && deps=" \
+          unzip \
+          autotools-dev \
+          cdbs \
+          dh-autoreconf \
+          libglib2.0-dev \
+          gtk-doc-tools \
+          libgnutls-dev\
+      " \
+  && apt-get install -y --no-install-recommends --no-install-suggests \
+          $deps\
+  && wget -O libnice.zip https://github.com/alexlapa/libnice/archive/master.zip \
+  && unzip libnice.zip \
+  && cd libnice-master \
+  && ./autogen.sh \
+  && ./configure --libdir=/usr/lib/x86_64-linux-gnu/ \
+  && make \
+  && make install \
+  && apt-get clean \
+  # Cleanup unnecessary stuff
+  && apt-get purge -y --auto-remove \
+                    -o APT::AutoRemove::RecommendsImportant=false \
+              $deps \
+  && rm -rf /var/lib/apt/lists/* \
+             /etc/*/inetutils-syslogd \
+             /tmp/*
