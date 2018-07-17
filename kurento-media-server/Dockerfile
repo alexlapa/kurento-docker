@@ -1,9 +1,8 @@
 FROM kurento/kurento-media-server:6.7.2-xenial
 
-RUN apt-get update \
-  && apt-get upgrade -y \
+RUN cd \tmp \
+  && apt-get update \
   && deps=" \
-          unzip \
           autotools-dev \
           cdbs \
           dh-autoreconf \
@@ -13,8 +12,8 @@ RUN apt-get update \
       " \
   && apt-get install -y --no-install-recommends --no-install-suggests \
           $deps\
-  && wget -O libnice.zip https://github.com/alexlapa/libnice/archive/master.zip \
-  && unzip libnice.zip \
+  && wget -O libnice.tar.gz https://github.com/alexlapa/libnice/archive/master.tar.gz \
+  && tar -xvzf libnice.tar.gz \
   && cd libnice-master \
   && ./autogen.sh \
   && ./configure --libdir=/usr/lib/x86_64-linux-gnu/ \
@@ -26,5 +25,4 @@ RUN apt-get update \
                     -o APT::AutoRemove::RecommendsImportant=false \
               $deps \
   && rm -rf /var/lib/apt/lists/* \
-             /etc/*/inetutils-syslogd \
              /tmp/*
