@@ -1,12 +1,15 @@
-FROM kurento/kurento-media-server:6.7.2-xenial
+FROM kurento/kurento-media-server:6.8.0-xenial
 
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 5AFA7A83 \
+RUN apt-get update \
+  && apt-get install -y software-properties-common \
+  && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 5AFA7A83 \
   && add-apt-repository "deb http://ubuntu.openvidu.io/dev xenial kms6" \
   && cd /tmp \
   && apt-get update \
   && deps=" \
           build-essential \
           cmake \
+          software-properties-common \
           autotools-dev \
           cdbs \
           dh-autoreconf \
@@ -18,7 +21,7 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 5AFA7A83 \
           libssl-dev \
       " \
   && apt-get install -y --no-install-recommends --no-install-suggests \
-          $deps \
+          $deps curl \
   # Install custom libnice
   && wget -O libnice.tar.gz https://github.com/alexlapa/libnice/archive/master.tar.gz \
   && tar -xvzf libnice.tar.gz \
